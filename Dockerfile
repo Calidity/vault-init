@@ -24,10 +24,13 @@ RUN strip /bin/vault-init
 
 RUN upx -q -9 /bin/vault-init
 
-
-
+RUN mkdir /user && \
+    echo 'nobody:x:65534:65534:nobody:/:' > /user/passwd && \
+    echo 'nobody:x:65534:' > /user/group
 
 FROM scratch
+COPY --from=builder /user/group /user/passwd /etc/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /bin/vault-init /bin/vault-init
+USER 65534:65534
 CMD ["/bin/vault-init"]
